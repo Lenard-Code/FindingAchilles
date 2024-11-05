@@ -72,8 +72,8 @@ def main():
                 return cpes
             else:
                 print(f"No CPEs found for {software_name} version {version}.")
-            dlinks = dl_link_PS(f"{software_name} {version}")
             print(f"DLinks.")
+            dlinks = dl_link_PS(f"{software_name} {version}")
             if dlinks:
                 print(f"Found {len(dlinks)} download links for {software_name} version {version}:")
                 for dlink in dlinks:
