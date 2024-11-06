@@ -8,6 +8,7 @@ FindingAchilles is a Python-based tool designed to identify Common Vulnerabiliti
 
 ## Requirements
 Python 3.x
+NVD API Key
 requests
 beautifulsoup4
 pyExploitDb
