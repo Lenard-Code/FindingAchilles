@@ -2,9 +2,5 @@
     {
         "name": "Splunk",
         "version": "9.0.5"
-    },
-    {
-	"name": "VLC Media Player",
-	"version": "3.0"
     }
 ]

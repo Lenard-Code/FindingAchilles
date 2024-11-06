@@ -137,6 +137,20 @@ def synk_db(cve_id):
         print(f"Error fetching Snyk data: {e}")
     return None
 
+def query_exploitdb(software_name, version):
+    pEdb = PyExploitDb()
+    pEdb.debug = False
+    pEdb.openFile()
+    
+    query = f"{software_name} {version}"
+    results = pEdb.searchTitle(query)
+    
+    if results:
+        return results
+    else:
+        print(f"No exploits found in ExploitDB for {software_name} version {version}.")
+        return []
+
 def main():
     parser = argparse.ArgumentParser(description="Check if a software has any CVEs.")
     parser.add_argument("json_file", help="Path to the JSON file containing software names and versions")
@@ -153,8 +167,8 @@ def main():
             cpes = check_cves(software_name, version)
             if cpes:
                 print(f"\n[!] Found {len(cpes)} CPEs for {software_name} version {version}:")
-                #for cpe in cpes:
-                #    print(f"{cpe}")
+                for cpe in cpes:
+                    print(f"{cpe}")
             else:
                 print(f"\n[+] No CPEs found for {software_name} version {version}.")
             
@@ -172,6 +186,7 @@ def main():
             else:
                 continue
             cpe_num = len(cpes)
+            print(f"Number of CPE's: {cpe_num}")
             if cpe_num > 0:
                 print("[!] CVE Details")
             else:
@@ -196,6 +211,7 @@ def main():
                         else:
                             print("-- Exploit/POC Over Github: None")
                         print(f"-- Exploit Status: {result['Exploit Status']}\n")
+            query_exploitdb(software_name, version)
         else:
             print(f"[-] Invalid entry in JSON file: {software}")
 
