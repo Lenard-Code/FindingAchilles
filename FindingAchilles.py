@@ -137,18 +137,26 @@ def synk_db(cve_id):
         print(f"Error fetching Snyk data: {e}")
     return None
 
-def query_exploitdb(software_name):
+def query_exploitdb(software_name, version):
     pEdb = PyExploitDb()
     pEdb.debug = False
-    pEdb.openFile()
-    
-    query = f"{software_name}"
-    results = pEdb.searchCve(query)
-    
+    try:
+        pEdb.openFile()
+    except Exception as e:
+        print(f"Error opening ExploitDB file: {e}")
+        return []
+
+    query = f"{software_name}+{version}"
+    try:
+        results = pEdb.searchCve(query)
+    except Exception as e:
+        print(f"Error searching ExploitDB: {e}")
+        return []
+
     if results:
         return results
     else:
-        print(f"No exploits found in ExploitDB for {software_name} version .")
+        print(f"No exploits found in ExploitDB for {software_name} version {version}.")
         return []
     
 def main():
@@ -211,7 +219,7 @@ def main():
                             print("-- Exploit/POC Over Github: None")
                         print(f"-- Exploit Status: {result['Exploit Status']}\n")
             '''
-            exploits = query_exploitdb(software_name)
+            exploits = query_exploitdb(software_name,version)
             for exploit in exploits:
                 print(exploit)
         else:
