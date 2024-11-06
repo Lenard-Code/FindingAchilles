@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 from pyExploitDb import PyExploitDb
 
 # Hardcoded API key
-API_KEY = "NVD-API-KEY"
+#API_KEY = "NVD-API-KEY"
 
 
 def check_cves(software_name, version):
@@ -140,63 +140,75 @@ def synk_db(cve_id):
     
 def main():
     parser = argparse.ArgumentParser(description="Check if a software has any CVEs.")
-    parser.add_argument("json_file", help="Path to the JSON file containing software names and versions")
+    parser.add_argument("--input", "-i", required=True, help="Path to the JSON file containing software names and versions")
+    parser.add_argument("--output", "-o", required=True, help="Path to the output text file")
+    parser.add_argument("--microsoft", action="store_true", help="Ignore all Microsoft publisher applications")
+    parser.add_argument("--help", "-h", action="help", help="Show this help message and exit")
     args = parser.parse_args()
 
-    with open(args.json_file, 'r', encoding='latin-1') as file:
+    with open(args.input, 'r') as file:
         software_list = json.load(file)
     
+    results = []
+
     for software in software_list:
-        software_name = software.get("DisplayName")
-        version = software.get("DisplayVersion")
+        software_name = software.get("name")
+        version = software.get("version")
+        publisher = software.get("publisher")
 
         if software_name and version:
+            if args.microsoft and publisher in ["Microsoft Corporation", "Microsoft", "Microsoft Corporations"]:
+                continue
+
             cpes = check_cves(software_name, version)
             if cpes:
-                print(f"\n[!] Found {len(cpes)} CPEs for {software_name} version {version}:")
+                results.append(f"\n[!] Found {len(cpes)} CPEs for {software_name} version {version}:")
                 #for cpe in cpes:
-                #    print(f"{cpe}")
+                #    results.append(f"{cpe}")
             else:
-                print(f"\n[+] No CPEs found for {software_name} version {version}.")
+                results.append(f"\n[+] No CPEs found for {software_name} version {version}.")
             
             dlinks = dl_link_PS(f"{software_name} {version}")
             if dlinks:
-                print(f"[!] Found {len(dlinks)} download links for {software_name} version {version}:")
+                results.append(f"[!] Found {len(dlinks)} download links for {software_name} version {version}:")
                 for dlink in dlinks:
-                    print(f"-- {dlink}")
+                    results.append(f"-- {dlink}")
 
             marc_info = search_marc_info(f"{software_name}%20{version}")
             if marc_info:
-                print("[!] Exploits found in Marc Full Disclosure")
+                results.append("[!] Exploits found in Marc Full Disclosure")
                 for result in marc_info:
-                    print(f"-- {result['Name']}: {result['Link']}")
+                    results.append(f"-- {result['Name']}: {result['Link']}")
             cpe_num = len(cpes)
             if cpe_num > 0:
-                print("[!] CVE Details")
+                results.append("[!] CVE Details")
             else:
-                print("[+] No CPE's to search for CVE's")
+                results.append("[+] No CPE's to search for CVE's")
             for cpe_string in cpes:
-                results = fetch_cve_details(cpe_string)
-                if results:
-                    for result in results:
-                        cve_id = result["CVE ID"]
-                        print(f"[!] CVE ID: {cve_id}")
-                        if result["Short Name"]:
-                            print(f"-- Short Name: {result['Short Name']}")
-                        print(f"-- Description: {result['Description']}")
-                        print(f"-- Weaknesses: {result['Weaknesses']}")
-                        print(f"-- Link: {result['Link']}")
+                cve_details = fetch_cve_details(cpe_string)
+                if cve_details:
+                    for detail in cve_details:
+                        cve_id = detail["CVE ID"]
+                        results.append(f"[!] CVE ID: {cve_id}")
+                        if detail["Short Name"]:
+                            results.append(f"-- Short Name: {detail['Short Name']}")
+                        results.append(f"-- Description: {detail['Description']}")
+                        results.append(f"-- Weaknesses: {detail['Weaknesses']}")
+                        results.append(f"-- Link: {detail['Link']}")
 
                         github_links = fetch_github_urls(cve_id)
                         if github_links:
-                            print("-- Exploit/POC Over Github")
+                            results.append("-- Exploit/POC Over Github")
                             for link in github_links:
-                                print(f"  {link}")
+                                results.append(f"  {link}")
                         else:
-                            print("-- Exploit/POC Over Github: None")
-                        print(f"-- Exploit Status: {result['Exploit Status']}\n")
+                            results.append("-- Exploit/POC Over Github: None")
+                        results.append(f"-- Exploit Status: {detail['Exploit Status']}\n")
         else:
-            print(f"[-] Invalid entry in JSON file: {software}")
+            results.append(f"[-] Invalid entry in JSON file: {software}")
+
+    with open(args.output, 'w') as outfile:
+        outfile.write("\n".join(results))
 
 if __name__ == "__main__":
     main()
