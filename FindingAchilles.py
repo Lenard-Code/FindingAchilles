@@ -143,7 +143,7 @@ def query_exploitdb(software_name, version):
     pEdb.openFile()
     
     query = f"{software_name} {version}"
-    results = pEdb.searchTitle(query)
+    results = pEdb.searchCve(query)
     
     if results:
         return results
@@ -185,7 +185,6 @@ def main():
                     print(f"-- {result['Name']}: {result['Link']}")
 
             cpe_num = len(cpes)
-            print(f"Number of CPE's: {cpe_num}")
             if cpe_num > 0:
                 print("[!] CVE Details")
             else:
@@ -210,7 +209,9 @@ def main():
                         else:
                             print("-- Exploit/POC Over Github: None")
                         print(f"-- Exploit Status: {result['Exploit Status']}\n")
-            query_exploitdb(software_name, version)
+            exploits = query_exploitdb(software_name, version)
+            for exploit in exploits:
+                print(exploit)
         else:
             print(f"[-] Invalid entry in JSON file: {software}")
 
