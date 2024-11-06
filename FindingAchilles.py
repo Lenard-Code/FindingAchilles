@@ -143,12 +143,12 @@ def main():
     parser.add_argument("json_file", help="Path to the JSON file containing software names and versions")
     args = parser.parse_args()
 
-    with open(args.json_file, 'r') as file:
+    with open(args.json_file, 'r', encoding='latin-1') as file:
         software_list = json.load(file)
     
     for software in software_list:
-        software_name = software.get("name")
-        version = software.get("version")
+        software_name = software.get("DisplayName")
+        version = software.get("DisplayVersion")
 
         if software_name and version:
             cpes = check_cves(software_name, version)
