@@ -1,6 +1,6 @@
 # FindingAchilles
 <div align="center">
-  <img src="FindingAchilles.jpgE" alt="FindingAchilles Logo" />
+  <img src="/FindingAchilles.jpgE" alt="FindingAchilles Logo" />
 </div>
 ## Description
 FindingAchilles is a Python-based tool designed to identify Common Vulnerabilities and Exposures (CVEs) for specified software and versions by querying various databases and sources.
