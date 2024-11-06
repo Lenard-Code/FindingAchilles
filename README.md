@@ -7,16 +7,16 @@
 FindingAchilles is a Python-based tool designed to identify Common Vulnerabilities and Exposures (CVEs) for specified software and versions by querying various databases and sources.
 
 ## Requirements
-Python 3.x
-NVD API Key
-requests
-beautifulsoup4
-pyExploitDb
+Python 3.x<br/>
+NVD API Key<br/>
+requests<br/>
+beautifulsoup4<br/>
+pyExploitDb<br/>
 ## Installation
-Clone the repository:
-sh
-git clone https://github.com/Lenard-Code/FindingAchilles.git
-cd FindingAchilles
+Clone the repository:<br/>
+sh<br/>
+git clone https://github.com/Lenard-Code/FindingAchilles.git<br/>
+cd FindingAchilles<br/>
 ## Install the required dependencies:
 pip install -r requirements.txt
 ## Usage
