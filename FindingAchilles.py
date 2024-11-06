@@ -183,8 +183,7 @@ def main():
                 print("[!] Exploits found in Marc Full Disclosure")
                 for result in marc_info:
                     print(f"-- {result['Name']}: {result['Link']}")
-            else:
-                continue
+
             cpe_num = len(cpes)
             print(f"Number of CPE's: {cpe_num}")
             if cpe_num > 0:
