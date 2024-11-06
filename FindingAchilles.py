@@ -136,28 +136,6 @@ def synk_db(cve_id):
     except requests.RequestException as e:
         print(f"Error fetching Snyk data: {e}")
     return None
-
-def query_exploitdb(software_name, version):
-    pEdb = PyExploitDb()
-    pEdb.debug = False
-    try:
-        pEdb.openFile()
-    except Exception as e:
-        print(f"Error opening ExploitDB file: {e}")
-        return []
-
-    query = f"{software_name}+{version}"
-    try:
-        results = pEdb.searchCve(query)
-    except Exception as e:
-        print(f"Error searching ExploitDB: {e}")
-        return []
-
-    if results:
-        return results
-    else:
-        print(f"No exploits found in ExploitDB for {software_name} version {version}.")
-        return []
     
 def main():
     parser = argparse.ArgumentParser(description="Check if a software has any CVEs.")
@@ -191,8 +169,6 @@ def main():
                 print("[!] Exploits found in Marc Full Disclosure")
                 for result in marc_info:
                     print(f"-- {result['Name']}: {result['Link']}")
-
-            '''
             cpe_num = len(cpes)
             if cpe_num > 0:
                 print("[!] CVE Details")
@@ -218,10 +194,6 @@ def main():
                         else:
                             print("-- Exploit/POC Over Github: None")
                         print(f"-- Exploit Status: {result['Exploit Status']}\n")
-            '''
-            exploits = query_exploitdb(software_name,version)
-            for exploit in exploits:
-                print(exploit)
         else:
             print(f"[-] Invalid entry in JSON file: {software}")
 
