@@ -1,5 +1,5 @@
-<div align="center">
 # FindingAchilles
+<div align="center">
   <img src="/FindingAchilles.jpg" alt="FindingAchilles Logo" />
 </div>
 
