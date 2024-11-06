@@ -54,14 +54,15 @@ def search_marc_info(search_term):
             soup = BeautifulSoup(response.text, 'html.parser')
             pre_tag = soup.find('pre')
             if pre_tag:
+                print(pre_tag)
                 post_links = pre_tag.find_all('a', string=lambda text: "full-disc" not in text)
                 results = [{"Name": link.get_text(strip=True), "Link": "https://marc.info" + link['href']} for link in post_links]
                 if results:
                     return results
                 else:
-                    print("[+] No matching exploits found in Marc Full Disclosure.", "green")
+                    print("[+] No matching exploits found in Marc Full Disclosure.")
             else:
-                print("[+] No matching exploits found in Marc Full Disclosure.", "green")
+                print("[+] No matching exploits found in Marc Full Disclosure.")
         else:
             print(f"Failed to retrieve the web page. Status code: {response.status_code}")
     except requests.RequestException as e:
@@ -168,7 +169,7 @@ def main():
                 for dlink in dlinks:
                     print(f"-- {dlink}")
 
-            marc_info = search_marc_info(f"{software_name} {version}")
+            marc_info = search_marc_info(f"{software_name}%20{version}")
             if marc_info:
                 print("[!] Exploits found in Marc Full Disclosure")
                 for result in marc_info:
