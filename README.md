@@ -21,19 +21,19 @@ cd FindingAchilles<br/>
 pip install -r requirements.txt
 ## Usage
 Prepare a JSON file containing software names and versions:
-JSON
-[
-    {"name": "software1", "version": "1.0"},
-    {"name": "software2", "version": "2.1"}
-]
+JSON<br/>
+[<br/>
+    {"name": "software1", "version": "1.0"},<br/>
+    {"name": "software2", "version": "2.1"}<br/>
+]<br/>
 ## Run the script:
-python FindingAchilles.py path/to/your/json_file.json
-Example
-python FindingAchilles.py software_versions.json
+python FindingAchilles.py path/to/your/json_file.json<br/>
+Example<br/>
+python FindingAchilles.py software_versions.json<br/>
 ## Acknowledgments
-This project makes use of code from [ThreatTracer](https://github.com/anmolksachan/ThreatTracer/blob/main/threattracer.py) by [anmolksachan](https://github.com/anmolksachan).
+This project makes use of code from [ThreatTracer](https://github.com/anmolksachan/ThreatTracer/blob/main/threattracer.py) by [anmolksachan](https://github.com/anmolksachan).<br/>
 # Contributing
-Contributions are welcome! Please fork the repository and create a pull request with your changes.
+Contributions are welcome! Please fork the repository and create a pull request with your changes.<br/>
 # License
-This project is licensed under the MIT License.
+This project is licensed under the MIT License.<br/>
 
