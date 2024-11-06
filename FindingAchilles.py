@@ -75,7 +75,7 @@ def fetch_cve_details(cpe_string):
         time.sleep(1)
         cve_query_string = ":".join(cpe_string.split(":")[1:5])
         url = f"{base_url}?cpeName=cpe:{cpe_string}"
-        print(f"Querying: {url}")
+        #print(f"Querying: {url}")
 
         try:
             response = requests.get(url)
@@ -100,12 +100,12 @@ def fetch_cve_details(cpe_string):
                     snyk_short_name = synk_db(cve_id)
 
                     all_cve_details.append({
-                        "[!] CVE ID": cve_id,
-                        "-- Short Name": snyk_short_name,
-                        "-- Description": description_text,
-                        "-- Weaknesses": ", ".join(weaknesses),
-                        "-- Link": link,
-                        "-- Exploit Status": exploit_status
+                        "CVE ID": cve_id,
+                        "Short Name": snyk_short_name,
+                        "Description": description_text,
+                        "Weaknesses": ", ".join(weaknesses),
+                        "Link": link,
+                        "Exploit Status": exploit_status
                     })
         except requests.RequestException as e:
             continue
@@ -171,18 +171,22 @@ def main():
                     print(f"-- {result['Name']}: {result['Link']}")
             else:
                 continue
-            print("\nCVE Details")
+            cpe_num = len(cpes)
+            if cpe_num > 0:
+                print("[!] CVE Details")
+            else:
+                print("[+] No CPE's to search for CVE's")
             for cpe_string in cpes:
                 results = fetch_cve_details(cpe_string)
                 if results:
                     for result in results:
                         cve_id = result["CVE ID"]
-                        print(f"\nCVE ID: {cve_id}")
+                        print(f"[!] CVE ID: {cve_id}")
                         if result["Short Name"]:
-                            print(f"Short Name: {result['Short Name']}")
-                        print(f"Description: {result['Description']}")
-                        print(f"Weaknesses: {result['Weaknesses']}")
-                        print(f"Link: {result['Link']}")
+                            print(f"-- Short Name: {result['Short Name']}")
+                        print(f"-- Description: {result['Description']}")
+                        print(f"-- Weaknesses: {result['Weaknesses']}")
+                        print(f"-- Link: {result['Link']}")
 
                         github_links = fetch_github_urls(cve_id)
                         if github_links:
