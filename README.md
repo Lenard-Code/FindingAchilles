@@ -1,4 +1,6 @@
-:-: # FindingAchilles
+<h1 align="center">
+<b>FindingAchilles</b>
+</h1>
 <div align="center">
   <img src="/FindingAchilles.jpg" alt="FindingAchilles Logo" />
 </div>
