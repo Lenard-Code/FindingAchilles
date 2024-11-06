@@ -4,7 +4,7 @@
 </div>
 
 ## Description
-FindingAchilles is a Python-based tool designed to identify Common Vulnerabilities and Exposures (CVEs) for specified software and versions by querying various databases and sources.
+FindingAchilles is a Python-based Red/Blue Team tool designed to identify Common Vulnerabilities and Exposures (CVEs) for specified software and versions by querying various databases and sources. This was created based off the [ThreatTracer](https://github.com/anmolksachan/ThreatTracer/blob/main/threattracer.py) by [anmolksachan](https://github.com/anmolksachan) project but modified to handle a JSON input file. Further additions and modifications will continue to happen.
 
 ## Requirements
 Python 3.x<br/>
@@ -28,8 +28,6 @@ JSON<br/>
 ]<br/>
 ## Run the script:
 python FindingAchilles.py path/to/your/json_file.json<br/>
-Example<br/>
-python FindingAchilles.py software_versions.json<br/>
 ## Acknowledgments
 This project makes use of code from [ThreatTracer](https://github.com/anmolksachan/ThreatTracer/blob/main/threattracer.py) by [anmolksachan](https://github.com/anmolksachan).<br/>
 # Contributing
