@@ -25,12 +25,10 @@ JSON
 python FindingAchilles.py path/to/your/json_file.json
 Example
 python FindingAchilles.py software_versions.json
+## Acknowledgments
+This project makes use of code from [ThreatTracer](https://github.com/anmolksachan/ThreatTracer/blob/main/threattracer.py) by [anmolksachan](https://github.com/anmolksachan).
 # Contributing
 Contributions are welcome! Please fork the repository and create a pull request with your changes.
-
 # License
 This project is licensed under the MIT License.
-
-# Contact
-For any questions or issues, please open an issue on GitHub.
 
