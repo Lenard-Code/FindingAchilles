@@ -9,6 +9,7 @@ from pyExploitDb import PyExploitDb
 # Hardcoded API key
 API_KEY = "NVD-API-KEY"
 
+
 def check_cves(software_name, version):
     url = f"https://nvd.nist.gov/products/cpe/search/results"
     params = {"namingFormat": "2.3", "keyword": f"{software_name} {version}"}
