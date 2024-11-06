@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 from pyExploitDb import PyExploitDb
 
 # Hardcoded API key
-API_KEY = "6beeb12-b047-4fc9-a4a9-19d788cf059c"
+API_KEY = "NVD-API-KEY"
 
 def check_cves(software_name, version):
     url = f"https://nvd.nist.gov/products/cpe/search/results"
