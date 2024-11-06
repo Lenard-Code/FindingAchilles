@@ -33,7 +33,8 @@ python FindingAchilles.py path/to/your/json_file.json<br/>
 <div align="center">
   <img src="/example.jpg" alt="example" />
 </div>
-## Acknowledgments
+
+## Acknowledgments</br>
 This project makes use of code from [ThreatTracer](https://github.com/anmolksachan/ThreatTracer/blob/main/threattracer.py) by [anmolksachan](https://github.com/anmolksachan).<br/>
 # Contributing
 Contributions are welcome! Please fork the repository and create a pull request with your changes.<br/>
