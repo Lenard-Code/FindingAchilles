@@ -21,8 +21,8 @@ def check_cves(software_name, version):
         try:
             data = response.text
             cpe_pattern = re.compile(r'cpe:(.*?)<')
-            cpes = cpe_pattern.findall(data)
-            return cpes
+            cpes_pat = cpe_pattern.findall(data)
+            return cpes_pat
         except json.JSONDecodeError as e:
             print(f"JSONDecodeError: {e}")
             print(f"Response content: {response.text}")
@@ -54,8 +54,7 @@ def search_marc_info(search_term):
             soup = BeautifulSoup(response.text, 'html.parser')
             pre_tag = soup.find('pre')
             if pre_tag:
-                print(pre_tag)
-                post_links = pre_tag.find_all('a', string=lambda text: "full-disc" not in text)
+                post_links = pre_tag.find_all('a', string=lambda text: text is not None and "full-disc" not in text)
                 results = [{"Name": link.get_text(strip=True), "Link": "https://marc.info" + link['href']} for link in post_links]
                 if results:
                     return results
@@ -76,14 +75,10 @@ def fetch_cve_details(cpe_string):
         time.sleep(1)
         cve_query_string = ":".join(cpe_string.split(":")[1:5])
         url = f"{base_url}?cpeName=cpe:{cpe_string}"
-        #print(f"Querying: {url}")
+        print(f"Querying: {url}")
 
         try:
-            headers = {
-                "apiKey": API_KEY
-            }
-            response = requests.get(url, headers=headers)
-            #response = requests.get(url)
+            response = requests.get(url)
             response.raise_for_status()
             data = response.json()
             if response.status_code == 200:
@@ -105,12 +100,12 @@ def fetch_cve_details(cpe_string):
                     snyk_short_name = synk_db(cve_id)
 
                     all_cve_details.append({
-                        "CVE ID": cve_id,
-                        "Short Name": snyk_short_name,
-                        "Description": description_text,
-                        "Weaknesses": ", ".join(weaknesses),
-                        "Link": link,
-                        "Exploit Status": exploit_status
+                        "[!] CVE ID": cve_id,
+                        "-- Short Name": snyk_short_name,
+                        "-- Description": description_text,
+                        "-- Weaknesses": ", ".join(weaknesses),
+                        "-- Link": link,
+                        "-- Exploit Status": exploit_status
                     })
         except requests.RequestException as e:
             continue
@@ -176,13 +171,13 @@ def main():
                     print(f"-- {result['Name']}: {result['Link']}")
             else:
                 continue
+            print("\nCVE Details")
             for cpe_string in cpes:
                 results = fetch_cve_details(cpe_string)
                 if results:
-                    #print("\nCVE Details")
                     for result in results:
                         cve_id = result["CVE ID"]
-                        print(f"\nCVE ID: {cve_id}", "white")
+                        print(f"\nCVE ID: {cve_id}")
                         if result["Short Name"]:
                             print(f"Short Name: {result['Short Name']}")
                         print(f"Description: {result['Description']}")
@@ -191,12 +186,12 @@ def main():
 
                         github_links = fetch_github_urls(cve_id)
                         if github_links:
-                            print("\n[!] Exploit/POC Over Github")
+                            print("-- Exploit/POC Over Github")
                             for link in github_links:
                                 print(f"  {link}")
                         else:
-                            print("\nExploit/POC Over Github: None")
-                        print(f"Exploit Status: {result['Exploit Status']}")
+                            print("-- Exploit/POC Over Github: None")
+                        print(f"-- Exploit Status: {result['Exploit Status']}\n")
         else:
             print(f"[-] Invalid entry in JSON file: {software}")
 
