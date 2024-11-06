@@ -52,15 +52,16 @@ def search_marc_info(search_term):
         response = requests.get(url)
         if response.status_code == 200:
             soup = BeautifulSoup(response.text, 'html.parser')
-            if "No hits found for" in soup.get_text():
-                print("[+] No matching exploits found in Marc Full Disclosure.")
-            else:
-                post_links = soup.find('pre').find_all('a', string=lambda text: "full-disc" not in text)
+            pre_tag = soup.find('pre')
+            if pre_tag:
+                post_links = pre_tag.find_all('a', string=lambda text: "full-disc" not in text)
                 results = [{"Name": link.get_text(strip=True), "Link": "https://marc.info" + link['href']} for link in post_links]
                 if results:
                     return results
                 else:
                     print("[+] No matching exploits found in Marc Full Disclosure.", "green")
+            else:
+                print("[+] No matching exploits found in Marc Full Disclosure.", "green")
         else:
             print(f"Failed to retrieve the web page. Status code: {response.status_code}")
     except requests.RequestException as e:
