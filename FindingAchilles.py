@@ -144,6 +144,23 @@ def extract_version(value):
     if match:
         return match.group(0)
     return None
+
+def sanitize_version(version):
+    # Remove any character that is not a digit or a dot
+    return re.sub(r'[^0-9.]', '', version)
+
+def normalize_software_name(name):
+    if "Python" in name:
+        return "Python"
+    if "Wix" in name:
+        return "Wix"
+    if "ASUS" in name:
+        return "ASUS"
+    if "SEGGER Microcontroller GmbH" in name:
+        return "Segger Microcontroller GmbH"
+    if "Windows Driver Package - SEGGER" in name:
+        return "Segger"
+    return name
     
 def main():
     parser = argparse.ArgumentParser(description="Check if a software has any CVEs.")
@@ -159,12 +176,13 @@ def main():
     seen = set()
 
     for software in software_list:
-        software_name = software.get("DisplayName")
+        software_name = normalize_software_name(software.get("DisplayName"))
         version = software.get("DisplayVersion")
         publisher = software.get("Publisher")
         
         if version:
             version = extract_version(version)
+            version = sanitize_version(version)
         
         unique_key = (software_name, version)
         if unique_key in seen:
