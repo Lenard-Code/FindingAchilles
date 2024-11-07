@@ -197,10 +197,9 @@ def normalize_software_name(name):
         return "ASUS"
     if "SEGGER Microcontroller GmbH" in name:
         return "Segger Microcontroller GmbH"
-    if "Windows Driver Package - SEGGER" or "Windows Driver Package - Segger" in name:
+    if "Windows Driver Package - SEGGER" in name:
         return "Segger"
-    else:
-        return name
+    return name
     
 def main():
     parser = argparse.ArgumentParser(description="Check if a software has any CVEs.")
