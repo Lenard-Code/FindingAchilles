@@ -209,6 +209,8 @@ def main():
     args = parser.parse_args()
 
     display_banner()
+    # Initialize software_list as an empty list
+    software_list = []    
     with open(args.input, 'r', encoding='latin-1') as file:
         software_list = json.load(file)
     
@@ -233,6 +235,7 @@ def main():
         seen.add(unique_key)
     
         if software_name and version:
+            print(f"{software_name} version {version}")
             cpes = check_cves(software_name, version)
             if cpes:
                 results.append(f"\n[!] Found {len(cpes)} CPEs for {software_name} version {version}:")
