@@ -158,7 +158,7 @@ def normalize_software_name(name):
         return "ASUS"
     if "SEGGER Microcontroller GmbH" in name:
         return "Segger Microcontroller GmbH"
-    if "Windows Driver Package - SEGGER" in name:
+    if "Windows Driver Package - SEGGER" or "Windows Driver Package - Segger" in name:
         return "Segger"
     return name
     
@@ -183,6 +183,9 @@ def main():
         if version:
             version = extract_version(version)
             version = sanitize_version(version)
+            
+        if args.microsoft and publisher in ["Microsoft Corporation", "Microsoft", "Microsoft Corporations"]:
+            continue
         
         unique_key = (software_name, version)
         if unique_key in seen:
