@@ -199,7 +199,8 @@ def normalize_software_name(name):
         return "Segger Microcontroller GmbH"
     if "Windows Driver Package - SEGGER" or "Windows Driver Package - Segger" in name:
         return "Segger"
-    return name
+    else:
+        return name
     
 def main():
     parser = argparse.ArgumentParser(description="Check if a software has any CVEs.")
@@ -216,7 +217,7 @@ def main():
     
     results = []
     seen = set()
-
+    print(software_list)
     for software in software_list:
         software_name = normalize_software_name(software.get("DisplayName"))
         version = software.get("DisplayVersion")
