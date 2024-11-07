@@ -8,7 +8,7 @@ from pyExploitDb import PyExploitDb
 
 # Hardcoded API key
 #API_KEY = "NVD-API-KEY"
-
+API_KEY = "6beeb12-b047-4fc9-a4a9-19d788cf059c"
 
 def check_cves(software_name, version):
     url = f"https://nvd.nist.gov/products/cpe/search/results"
@@ -41,7 +41,7 @@ def dl_link_PS(product_name):
             results = soup.find_all('a', href=True)
             download_links = [f"https://packetstormsecurity.com{result['href']}" for result in results if '/files/download/' in result['href'] and result['href'].endswith('.txt')]
             if not download_links:
-                print(f"No download links found for {product_name} (Packet Storm Security)")
+                print(f"[+] No download links found for {product_name} (Packet Storm Security)")
             return download_links
     except requests.RequestException as e:
         print(f"Error fetching download links: {e}")
@@ -137,25 +137,42 @@ def synk_db(cve_id):
     except requests.RequestException as e:
         print(f"Error fetching Snyk data: {e}")
     return None
+
+def extract_version(value):
+    version_pattern = re.compile(r'(\d+\.\d+(\.\d+)*(\.\d+)*)')
+    match = version_pattern.search(value)
+    if match:
+        return match.group(0)
+    return None
     
 def main():
     parser = argparse.ArgumentParser(description="Check if a software has any CVEs.")
     parser.add_argument("--input", "-i", required=True, help="Path to the JSON file containing software names and versions")
-    parser.add_argument("--output", "-o", required=True, help="Path to the output text file")
+    parser.add_argument("--output", "-o", help="Path to the output text file")
     parser.add_argument("--microsoft", action="store_true", help="Ignore all Microsoft publisher applications")
-    parser.add_argument("--help", "-h", action="help", help="Show this help message and exit")
     args = parser.parse_args()
 
-    with open(args.input, 'r') as file:
+    with open(args.input, 'r', encoding='latin-1') as file:
         software_list = json.load(file)
     
     results = []
+    seen = set()
 
     for software in software_list:
-        software_name = software.get("name")
-        version = software.get("version")
-        publisher = software.get("publisher")
-
+        software_name = software.get("DisplayName")
+        version = software.get("DisplayVersion")
+        publisher = software.get("Publisher")
+        
+        if version:
+            version = extract_version(version)
+        
+        unique_key = (software_name, version)
+        if unique_key in seen:
+            print(f"Skipping, {unique_key}")
+            continue
+        seen.add(unique_key)
+        
+        print(f"Adding: {unique_key}")
         if software_name and version:
             if args.microsoft and publisher in ["Microsoft Corporation", "Microsoft", "Microsoft Corporations"]:
                 continue
@@ -207,8 +224,11 @@ def main():
         else:
             results.append(f"[-] Invalid entry in JSON file: {software}")
 
-    with open(args.output, 'w') as outfile:
-        outfile.write("\n".join(results))
+    if args.output:
+        with open(args.output, 'w') as outfile:
+            outfile.write("\n".join(results))
+    else:
+        print("\n".join(results))
 
 if __name__ == "__main__":
     main()
