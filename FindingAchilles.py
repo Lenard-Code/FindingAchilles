@@ -1,3 +1,35 @@
+"""
+FindingAchilles.py
+==================
+A script to check if a software has any CVEs (Common Vulnerabilities and Exposures).
+
+Dependencies:
+-------------
+- requests
+- json
+- argparse
+- re
+- time
+- BeautifulSoup (from bs4)
+- pyExploitDb
+
+Usage:
+------
+Run the script with the required arguments:
+    python FindingAchilles.py --input <path_to_input_json> [--output <path_to_output_file>] [--microsoft]
+
+Options:
+--------
+--input, -i      Path to the JSON file containing software names and versions (required).
+--output, -o     Path to the output text file (optional).
+--microsoft      Ignore all Microsoft publisher applications (optional).
+
+Example:
+--------
+    python FindingAchilles.py --input software_list.json --output results.txt --microsoft
+
+"""
+
 import requests
 import json
 import argparse
@@ -9,6 +41,14 @@ from pyExploitDb import PyExploitDb
 # Hardcoded API key
 #API_KEY = "NVD-API-KEY"
 API_KEY = "6beeb12-b047-4fc9-a4a9-19d788cf059c"
+
+def display_banner():
+    banner = """
+/= | |\| |) | |\| (_, /\ ( |-| | |_ |_ [- _\~  
+                                                                                                             
+Its running... just wait for the results.
+    """
+    print(banner)
 
 def check_cves(software_name, version):
     url = f"https://nvd.nist.gov/products/cpe/search/results"
@@ -22,8 +62,8 @@ def check_cves(software_name, version):
         try:
             data = response.text
             cpe_pattern = re.compile(r'cpe:(.*?)<')
-            cpes_pat = cpe_pattern.findall(data)
-            return cpes_pat
+            cpes = cpe_pattern.findall(data)
+            return cpes
         except json.JSONDecodeError as e:
             print(f"JSONDecodeError: {e}")
             print(f"Response content: {response.text}")
@@ -39,9 +79,9 @@ def dl_link_PS(product_name):
         if response.status_code == 200:
             soup = BeautifulSoup(response.text, 'html.parser')
             results = soup.find_all('a', href=True)
-            download_links = [f"https://packetstormsecurity.com{result['href']}" for result in results if '/files/download/' in result['href'] and result['href'].endswith('.txt')]
-            if not download_links:
-                print(f"[+] No download links found for {product_name} (Packet Storm Security)")
+            download_links = [f"https://packetstormsecurity.com{result['href']}" for result in results if '/files/download/' in result['href'] and not result['href'].endswith('.txt')]
+            #if not download_links:
+                #print(f"[+] No download links found for {product_name} (Packet Storm Security)")
             return download_links
     except requests.RequestException as e:
         print(f"Error fetching download links: {e}")
@@ -59,15 +99,12 @@ def search_marc_info(search_term):
                 results = [{"Name": link.get_text(strip=True), "Link": "https://marc.info" + link['href']} for link in post_links]
                 if results:
                     return results
-                else:
-                    print("[+] No matching exploits found in Marc Full Disclosure.")
-            else:
-                print("[+] No matching exploits found in Marc Full Disclosure.")
+            return []
         else:
             print(f"Failed to retrieve the web page. Status code: {response.status_code}")
     except requests.RequestException as e:
         print(f"Error fetching Marc.Info data: {e}")
-    return None
+    return []
 
 def fetch_cve_details(cpe_string):
     base_url = "https://services.nvd.nist.gov/rest/json/cves/2.0"
@@ -111,7 +148,8 @@ def fetch_cve_details(cpe_string):
         except requests.RequestException as e:
             continue
         except json.JSONDecodeError:
-            print(f"Error decoding JSON for CPE: {cpe_string}. Skipping.")
+            error_return = f"Error decoding JSON for CPE: {cpe_string}. Skipping."
+            return error_return
 
     return all_cve_details
 
@@ -146,7 +184,8 @@ def extract_version(value):
     return None
 
 def sanitize_version(version):
-    # Remove any character that is not a digit or a dot
+    if version is None:
+        return None
     return re.sub(r'[^0-9.]', '', version)
 
 def normalize_software_name(name):
@@ -169,6 +208,7 @@ def main():
     parser.add_argument("--microsoft", action="store_true", help="Ignore all Microsoft publisher applications")
     args = parser.parse_args()
 
+    display_banner()
     with open(args.input, 'r', encoding='latin-1') as file:
         software_list = json.load(file)
     
@@ -179,44 +219,41 @@ def main():
         software_name = normalize_software_name(software.get("DisplayName"))
         version = software.get("DisplayVersion")
         publisher = software.get("Publisher")
-        
+    
         if version:
             version = extract_version(version)
             version = sanitize_version(version)
-            
+        
         if args.microsoft and publisher in ["Microsoft Corporation", "Microsoft", "Microsoft Corporations"]:
             continue
-        
+    
         unique_key = (software_name, version)
         if unique_key in seen:
-            print(f"Skipping, {unique_key}")
             continue
         seen.add(unique_key)
-        
-        print(f"Adding: {unique_key}")
+    
         if software_name and version:
-            if args.microsoft and publisher in ["Microsoft Corporation", "Microsoft", "Microsoft Corporations"]:
-                continue
-
             cpes = check_cves(software_name, version)
             if cpes:
                 results.append(f"\n[!] Found {len(cpes)} CPEs for {software_name} version {version}:")
-                #for cpe in cpes:
-                #    results.append(f"{cpe}")
             else:
                 results.append(f"\n[+] No CPEs found for {software_name} version {version}.")
-            
+        
             dlinks = dl_link_PS(f"{software_name} {version}")
             if dlinks:
                 results.append(f"[!] Found {len(dlinks)} download links for {software_name} version {version}:")
                 for dlink in dlinks:
                     results.append(f"-- {dlink}")
-
+            else:
+                results.append(f"[+] No download links found for {software_name} version {version}")
             marc_info = search_marc_info(f"{software_name}%20{version}")
             if marc_info:
                 results.append("[!] Exploits found in Marc Full Disclosure")
                 for result in marc_info:
-                    results.append(f"-- {result['Name']}: {result['Link']}")
+                    if isinstance(result, dict) and 'Name' in result and 'Link' in result:
+                        results.append(f"-- {result['Name']}: {result['Link']}")
+                    else:
+                        print(f"Invalid result format: {result}")
             cpe_num = len(cpes)
             if cpe_num > 0:
                 results.append("[!] CVE Details")
