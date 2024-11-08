@@ -316,6 +316,7 @@ def main():
                     results.append(f"-- {cpe}")
             else:
                 results.append(f"\n[+] No CPEs found for {software_name} version {version}.")
+                cpes = []
         
             dlinks = dl_link_PS(f"{software_name} {version}")
             if dlinks:
