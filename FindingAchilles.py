@@ -37,33 +37,67 @@ import re
 import time
 from bs4 import BeautifulSoup
 from pyExploitDb import PyExploitDb
+import nvdlib
 
 # Hardcoded API key
 #API_KEY = "NVD-API-KEY"
-API_KEY = "6beeb12-b047-4fc9-a4a9-19d788cf059c"
+API_KEY = "dcdd1ae2-c7a6-4873-b6e5-78316914862e"
+bearer_token = "f3706b113c2197c24e5992a753d96e708834868f.eyJzdWIiOjc4OTUsImlhdCI6MTczMTAyNTQ4MywiZXhwIjoxNzYyNDczNjAwLCJraWQiOjEsImMiOiJjVDVkQVFVT243eWpvQVlmeXpZMmdGRVVGTnQ1VW1yNlh6NVVhaHZhV1ROempGZHB4Z1RIdkFlNnpMVUQ5NndrMlZWYVVGZHcifQ=="
+#bearer_token = "f3706b113c2197c24e5992a753d96e708834868f"
 
 def display_banner():
     banner = """
 /= | |\| |) | |\| (_, /\ ( |-| | |_ |_ [- _\~  
                                                                                                              
-Its running... just wait for the results.
+    Relax... Its running... wait you bot.
     """
     print(banner)
 
+def fetch_cves_by_cpe(cpe):
+    results = []
+    try:
+        response = nvdlib.searchCVE(cpeName=cpe)
+        for cve in response:
+            cve_data = {
+                'CVE ID': cve.id,
+                'Description': cve.descriptions[0].value if cve.descriptions else 'No description available',
+                'Published Date': cve.publishedDate,
+                'Last Modified Date': cve.lastModifiedDate,
+                'CVSS v3.1 Base Score': cve.v3_1.get('baseScore') if cve.v3_1 else 'N/A',
+                'CVSS v2.0 Base Score': cve.v2.get('baseScore') if cve.v2 else 'N/A',
+                'Link': f'https://nvd.nist.gov/vuln/detail/{cve.id}'
+            }
+            results.append(cve_data)
+    except Exception as e:
+        print(f"Error fetching CVEs for CPE {cpe}: {e}")
+    return results
+
 def check_cves(software_name, version):
-    url = f"https://nvd.nist.gov/products/cpe/search/results"
-    params = {"namingFormat": "2.3", "keyword": f"{software_name} {version}"}
+    cpes = []
+    cve_details = []
+    
+    # Fetch CPEs using existing method
+    #url = f"https://nvd.nist.gov/products/cpe/search/results"
+    #params = {"namingFormat": "2.3", "keywordSearch": f"{software_name} {version}"}
+    url = f"https://services.nvd.nist.gov/rest/json/cpes/2.0?keywordSearch={software_name}%20{version}"
     headers = {
         "apiKey": API_KEY
-    }
-    response = requests.get(url, headers=headers, params=params)
-
+        }
+    response = requests.request("GET", url, headers=headers)
     if response.status_code == 200:
         try:
-            data = response.text
-            cpe_pattern = re.compile(r'cpe:(.*?)<')
-            cpes = cpe_pattern.findall(data)
-            return cpes
+            data = response.json()
+            cpe_ids = set()
+            cpe_nums = set()
+            for product in data.get("products", []):
+                cpe = product.get("cpe", {})
+                cpe_num = cpe.get("cpeName")
+                if cpe_num:
+                    cpe_nums.add(cpe_num)
+                cpe_name_id = cpe.get("cpeNameId")
+                if cpe_name_id:
+                    cpe_ids.add(cpe_name_id)
+            return list(cpe_nums)
         except json.JSONDecodeError as e:
             print(f"JSONDecodeError: {e}")
             print(f"Response content: {response.text}")
@@ -107,16 +141,19 @@ def search_marc_info(search_term):
     return []
 
 def fetch_cve_details(cpe_string):
-    base_url = "https://services.nvd.nist.gov/rest/json/cves/2.0"
+    base_url = "https://services.nvd.nist.gov/rest/json/cves/2.0?"
     all_cve_details = []
+    headers = {
+        "apiKey": API_KEY
+    }
     for cpe_string in [cpe_string]:
         time.sleep(1)
         cve_query_string = ":".join(cpe_string.split(":")[1:5])
-        url = f"{base_url}?cpeName=cpe:{cpe_string}"
+        url = f"{base_url}cpeName={cpe_string}"
         #print(f"Querying: {url}")
 
         try:
-            response = requests.get(url)
+            response = requests.get(url, headers=headers)
             response.raise_for_status()
             data = response.json()
             if response.status_code == 200:
@@ -145,7 +182,11 @@ def fetch_cve_details(cpe_string):
                         "Link": link,
                         "Exploit Status": exploit_status
                     })
+            else:
+                return (f"Failed to retrieve NVD CVE details for CPE: {cpe_string}. Status code: {response.status_code}")
+                continue
         except requests.RequestException as e:
+            #print(response.status_code)
             continue
         except json.JSONDecodeError:
             error_return = f"Error decoding JSON for CPE: {cpe_string}. Skipping."
@@ -200,6 +241,37 @@ def normalize_software_name(name):
     if "Windows Driver Package - SEGGER" in name:
         return "Segger"
     return name
+
+def search_cves_by_cpe(cpe, bearer_token):
+    url = "https://www.cvedetails.com/api/v1/vulnerability/list-by-cpe?"
+    headers = {
+        'Authorization': f'Bearer {bearer_token}',
+        'Content-Type': 'application/json'
+    }
+    params = {
+        'cpe': cpe
+    }
+    try:
+        response = requests.get(url, headers=headers, params=params)
+        response.raise_for_status()
+        cves = response.json()
+        return cves.get('results', [])
+    except requests.RequestException as e:
+        print(f"Error fetching CVEs for CPE {cpe}: {e}")
+        return None
+    
+def format_cve_details(cve_details):
+    formatted_details = []
+    for cve in cve_details:
+        formatted_details.append(f"CVE ID: {cve['cveId']}")
+        formatted_details.append(f"Summary: {cve['summary']}")
+        #formatted_details.append(f"Publish Date: {cve['publishDate']}")
+        #formatted_details.append(f"Update Date: {cve['updateDate']}")
+        #formatted_details.append(f"Max CVSS Base Score: {cve['maxCvssBaseScore']}")
+        #formatted_details.append(f"Max CVSS Exploitability Score: {cve['maxCvssExploitabilityScore']}")
+        #formatted_details.append(f"Max CVSS Impact Score: {cve['maxCvssImpactScore']}")
+        #formatted_details.append("-----")
+    return '\n'.join(formatted_details)
     
 def main():
     parser = argparse.ArgumentParser(description="Check if a software has any CVEs.")
@@ -216,7 +288,6 @@ def main():
     
     results = []
     seen = set()
-    print(software_list)
     for software in software_list:
         software_name = normalize_software_name(software.get("DisplayName"))
         version = software.get("DisplayVersion")
@@ -239,6 +310,8 @@ def main():
             cpes = check_cves(software_name, version)
             if cpes:
                 results.append(f"\n[!] Found {len(cpes)} CPEs for {software_name} version {version}:")
+                for cpe in cpes:
+                    results.append(f"-- {cpe}")
             else:
                 results.append(f"\n[+] No CPEs found for {software_name} version {version}.")
         
@@ -263,6 +336,7 @@ def main():
             else:
                 results.append("[+] No CPE's to search for CVE's")
             for cpe_string in cpes:
+                print(cpe_string)
                 cve_details = fetch_cve_details(cpe_string)
                 if cve_details:
                     for detail in cve_details:
@@ -282,6 +356,17 @@ def main():
                         else:
                             results.append("-- Exploit/POC Over Github: None")
                         results.append(f"-- Exploit Status: {detail['Exploit Status']}\n")
+                else:
+                    results.append(f"-- No CVE details found on NVD.")
+                #CVEDetails API call
+                cve_results = search_cves_by_cpe(cpe_string, bearer_token)
+                if cve_results is None or not cve_results:
+                    results.append(f"-- CVEDetails has no results for CPE:{cpe_string}")
+                else:
+                    for cve_result in cve_results:
+                        unique_cve_ids = set(cve['cveId'] for cve in cve_results)
+                        results.append(f"-- CVEDetails found {len(unique_cve_ids)} unique CVEs.")
+                        #results.append(format_cve_details(cve_results))
         else:
             results.append(f"[-] Invalid entry in JSON file: {software}")
 
