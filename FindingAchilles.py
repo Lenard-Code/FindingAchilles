@@ -289,6 +289,8 @@ def main():
     results = []
     seen = set()
     for software in software_list:
+        unique_cve_ids = set()
+        cve_details_list = []
         software_name = normalize_software_name(software.get("DisplayName"))
         version = software.get("DisplayVersion")
         publisher = software.get("Publisher")
@@ -306,7 +308,7 @@ def main():
         seen.add(unique_key)
     
         if software_name and version:
-            print(f"{software_name} version {version}")
+            
             cpes = check_cves(software_name, version)
             if cpes:
                 results.append(f"\n[!] Found {len(cpes)} CPEs for {software_name} version {version}:")
@@ -330,43 +332,64 @@ def main():
                         results.append(f"-- {result['Name']}: {result['Link']}")
                     else:
                         print(f"Invalid result format: {result}")
+            else:
+                results.append("[+] No exploits found in Marc Full Disclosure")
             cpe_num = len(cpes)
             if cpe_num > 0:
-                results.append("[!] CVE Details")
+                results.append("[!] Possible CVE Details")
             else:
                 results.append("[+] No CPE's to search for CVE's")
             for cpe_string in cpes:
-                print(cpe_string)
                 cve_details = fetch_cve_details(cpe_string)
                 if cve_details:
+                    cve_details_list.extend(cve_details)
                     for detail in cve_details:
                         cve_id = detail["CVE ID"]
-                        results.append(f"[!] CVE ID: {cve_id}")
-                        if detail["Short Name"]:
-                            results.append(f"-- Short Name: {detail['Short Name']}")
-                        results.append(f"-- Description: {detail['Description']}")
-                        results.append(f"-- Weaknesses: {detail['Weaknesses']}")
-                        results.append(f"-- Link: {detail['Link']}")
+                        unique_cve_ids.add(cve_id)
 
-                        github_links = fetch_github_urls(cve_id)
-                        if github_links:
-                            results.append("-- Exploit/POC Over Github")
-                            for link in github_links:
-                                results.append(f"  {link}")
-                        else:
-                            results.append("-- Exploit/POC Over Github: None")
-                        results.append(f"-- Exploit Status: {detail['Exploit Status']}\n")
-                else:
-                    results.append(f"-- No CVE details found on NVD.")
-                #CVEDetails API call
+                # CVEDetails API call
                 cve_results = search_cves_by_cpe(cpe_string, bearer_token)
-                if cve_results is None or not cve_results:
-                    results.append(f"-- CVEDetails has no results for CPE:{cpe_string}")
+                if cve_results:
+                    #print(cve_results)
+                    for cve in cve_results:
+                        unique_cve_ids.add(cve['cveId'])
+
+            # Add message about unique CVEs found by CVEDetails
+            results.append(f"-- Found {len(unique_cve_ids)} unique CVEs.")
+
+            #print(f"cve_results: {cve_results}")
+            # Process unique CVEs
+            for cve_id in unique_cve_ids:
+                detail = next((d for d in cve_details_list if d["CVE ID"] == cve_id), None)
+                if detail:
+                    results.append(f"--- {cve_id}")
+                    results.append(f"-- Short Name: {detail.get('Short Name', 'N/A')}")
+                    results.append(f"-- Description: {detail.get('Description', 'N/A')}")
+                    results.append(f"-- Weaknesses: {detail.get('Weaknesses', 'N/A')}")
+                    results.append(f"-- Link: {detail.get('Link', 'N/A')}")
+
+                cve_result = next((cr for cr in cve_results if cr['cveId'] == cve_id), None)
+                if cve_result:
+                    results.append(f"--- {cve_id}: {cve_result.get('summary', 'N/A')}")
+                    """
+                    results.append(f"-- Summary: {cve_result.get('summary', 'N/A')}")
+                    results.append(f"-- Publish Date: {cve_result.get('publishDate', 'N/A')}")
+                    results.append(f"-- Update Date: {cve_result.get('updateDate', 'N/A')}")
+                    results.append(f"-- Max CVSS Base Score: {cve_result.get('maxCvssBaseScore', 'N/A')}")
+                    results.append(f"-- Exploit Exists: {cve_result.get('exploitExists', 'N/A')}")
+                    """
+
+                    github_links = fetch_github_urls(cve_id)
+                    if github_links:
+                        results.append("-- Exploit/POC Over Github")
+                        for link in github_links:
+                            results.append(f"  {link}")
+                        results.append("\n")
+                    else:
+                        results.append("-- Exploit/POC Over Github: None\n")
+                    #results.append(f"-- Exploit Status: {detail.get('Exploit Status', 'N/A')}\n")
                 else:
-                    for cve_result in cve_results:
-                        unique_cve_ids = set(cve['cveId'] for cve in cve_results)
-                        results.append(f"-- CVEDetails found {len(unique_cve_ids)} unique CVEs.")
-                        #results.append(format_cve_details(cve_results))
+                    results.append(f"-- No CVE details found for {cve_id}.")
         else:
             results.append(f"[-] Invalid entry in JSON file: {software}")
 
