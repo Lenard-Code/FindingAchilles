@@ -40,12 +40,8 @@ from pyExploitDb import PyExploitDb
 import nvdlib
 
 # Hardcoded API key
-#API_KEY = "NVD-API-KEY"
-#bearer_token = "FROM-CVEDETAILS.COM"
-
-API_KEY = "dcdd1ae2-c7a6-4873-b6e5-78316914862e"
-bearer_token = "f3706b113c2197c24e5992a753d96e708834868f.eyJzdWIiOjc4OTUsImlhdCI6MTczMTAyNTQ4MywiZXhwIjoxNzYyNDczNjAwLCJraWQiOjEsImMiOiJjVDVkQVFVT243eWpvQVlmeXpZMmdGRVVGTnQ1VW1yNlh6NVVhaHZhV1ROempGZHB4Z1RIdkFlNnpMVUQ5NndrMlZWYVVGZHcifQ=="
-
+API_KEY = "NVD-API-KEY"
+bearer_token = "FROM-CVEDETAILS.COM"
 
 def display_banner():
     banner = """
