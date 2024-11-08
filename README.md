@@ -28,14 +28,17 @@ pip install -r requirements.txt
 Prepare a JSON file containing software names and versions:
 JSON<br/>
 [<br/>
-    {"name": "software1", "version": "1.0"},<br/>
-    {"name": "software2", "version": "2.1"}<br/>
+    {"DisplayName": "software1", "DisplayVersion": "1.0"},<br/>
+    {"DisplayName": "software2", "DisplayVersion": "2.1"}<br/>
 ]<br/>
 ## Run the script:
-python FindingAchilles.py path/to/your/json_file.json<br/>
-<div align="center">
-  <img src="/example.jpg" alt="example" />
-</div>
+python FindingAchilles.py --input <path_to_input_json> [--output <path_to_output_file>] [--microsoft]<br/>
+Command Line Parameters<br/>
+--input, -i: Path to the JSON file containing software names and versions (required).<br/>
+--output, -o: Path to the output text file (optional).<br/>
+--microsoft: Ignore all Microsoft publisher applications (optional).<br/>
+Example:<br/>
+python FindingAchilles.py --input software_list.json --output results.txt --microsoft<br/>
 
 ## Acknowledgments</br>
 This project makes use of code from [ThreatTracer](https://github.com/anmolksachan/ThreatTracer/blob/main/threattracer.py) by [anmolksachan](https://github.com/anmolksachan).<br/>
