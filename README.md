@@ -25,8 +25,8 @@ cd FindingAchilles<br/>
 ## Install the required dependencies:
 pip install -r requirements.txt
 ## Usage
-Prepare a JSON file containing software names and versions (Ex: [Get-InstalledApps.ps1](https://github.com/Lenard-Code/Scripts/blob/main/Powershell/Get-InstalledApps.ps1)):
-JSON<br/>
+Prepare a JSON file containing software names and versions (Ex: [Get-InstalledApps.ps1](https://github.com/Lenard-Code/Scripts/blob/main/Powershell/Get-InstalledApps.ps1)):<br/>
+JSON Format<br/>
 [<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;{<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"DisplayName": "software1",<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"DisplayVersion": "1.0"<br/>&nbsp;&nbsp;&nbsp;&nbsp;},<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;{<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"DisplayName": "software2",<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"DisplayVersion": "2.1"<br/>&nbsp;&nbsp;&nbsp;&nbsp;}<br/>
