@@ -228,7 +228,7 @@ def sanitize_version(version):
     if version is None:
         return None
     return re.sub(r'[^0-9.]', '', version)
-
+#Adjust as needed, simple list to get started
 def normalize_software_name(name):
     if "Python" in name:
         return "Python"
