@@ -28,8 +28,8 @@ pip install -r requirements.txt
 Prepare a JSON file containing software names and versions:
 JSON<br/>
 [<br/>
-    {<br/>"DisplayName": "software1",<br/>"DisplayVersion": "1.0"<br/>},<br/>
-    {<br/>"DisplayName": "software2",<br/>"DisplayVersion": "2.1"<br/>}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"DisplayName": "software1",<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"DisplayVersion": "1.0"<br/>&nbsp;&nbsp;&nbsp;&nbsp;},<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"DisplayName": "software2",<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"DisplayVersion": "2.1"<br/>&nbsp;&nbsp;&nbsp;&nbsp;}<br/>
 ]<br/>
 ## Run the script:
 python FindingAchilles.py --input <path_to_input_json> [--output <path_to_output_file>] [--microsoft]<br/>
