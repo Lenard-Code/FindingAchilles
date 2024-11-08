@@ -1,3 +1,5 @@
 requests
+argparse
 beautifulsoup4
 pyExploitDb
+nvdlib
