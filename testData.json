@@ -1,6 +1,7 @@
 [
     {
-        "name": "VLC Media Player",
-        "version": "1.0"
+		"DisplayName": "VLC Media",
+		"DisplayVersion": "3.0.1",
+		"Publisher": "Vetinari"
     }
 ]
