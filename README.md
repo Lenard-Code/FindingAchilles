@@ -11,9 +11,12 @@ FindingAchilles is a Python-based Red/Blue Team tool designed to identify Common
 ## Requirements
 Python 3.x<br/>
 NVD API Key<br/>
+CVEDetails Bearer Token<br/>
 requests<br/>
+argparse<br/>
 beautifulsoup4<br/>
 pyExploitDb<br/>
+nvdlib<br/>
 ## Installation
 Clone the repository:<br/>
 sh<br/>
